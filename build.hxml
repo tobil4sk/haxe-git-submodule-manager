@@ -1,3 +1,4 @@
 -p src
 -D analyzer-optimize
---run Run
+--main Run
+--neko run.n

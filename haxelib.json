@@ -5,6 +5,5 @@
 	"classPath": "src",
 	"description": "Tool used to manage haxe dependencies as git submodules",
 	"license": "MIT",
-	"main": "Run",
 	"releasenote": "Initial release"
 }
