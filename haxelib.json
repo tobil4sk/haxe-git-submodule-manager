@@ -1,0 +1,10 @@
+{
+	"name": "git-submodule-manager",
+	"version": "0.0.0",
+	"url": "https://github.com/tobil4sk/haxe-git-submodule-manager",
+	"classPath": "src",
+	"description": "Tool used to manage haxe dependencies as git submodules",
+	"license": "MIT",
+	"main": "Run",
+	"releasenote": "Initial release"
+}
