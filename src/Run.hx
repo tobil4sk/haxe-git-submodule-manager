@@ -52,7 +52,9 @@ function delete() {
 function install() {
 	Sys.println("Updating submodules...");
 	runGit("submodule", "update", "--init", "--recursive");
-	runHaxelib("newrepo");
+	try {
+		runHaxelib("newrepo");
+	} catch (e) {}
 
 	final projects = FileSystem.readDirectory(SUBMODULE_DIR);
 	for (name in projects) {
