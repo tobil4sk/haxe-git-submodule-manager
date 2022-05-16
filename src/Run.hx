@@ -1,9 +1,16 @@
+import sys.io.File;
 import haxe.Exception;
 import sys.FileSystem;
 import haxe.io.Path;
 using StringTools;
 
-final SUBMODULE_DIR = "haxe_modules";
+var SUBMODULE_DIR:String = ".haxe_modules";
+var CONFIG_FILE:String = ".haxe_gsm_config";
+var configData:Config;
+
+typedef Config = {
+	submoduleDir:String
+}
 
 macro function getVersion() {
 	final version:String = try {
@@ -31,7 +38,14 @@ final runGit = runCmd.bind("git");
 /** Runs a haxelib command. **/
 final runHaxelib = runCmd.bind("haxelib");
 
-function init() {
+function init(?folder:String) {
+	if(folder != null) {
+		configData = {submoduleDir: folder};
+		File.saveContent(CONFIG_FILE, haxe.Json.stringify(configData, "\t"));
+
+		SUBMODULE_DIR = configData.submoduleDir;
+	}
+
 	if (FileSystem.exists(SUBMODULE_DIR))
 		throw new Exception("This folder already contains a submodule folder.");
 	FileSystem.createDirectory(SUBMODULE_DIR);
@@ -40,7 +54,7 @@ function init() {
 	} catch (e) {
 		// already exists
 	}
-	Sys.println("Haxe module directory initialised");
+	Sys.println('Haxe module directory initialised at $SUBMODULE_DIR');
 	Sys.println("Add `/.haxelib/` to .gitignore");
 }
 
@@ -50,6 +64,9 @@ function delete() {
 }
 
 function install() {
+	configData = haxe.Json.parse(File.getContent(CONFIG_FILE));
+	SUBMODULE_DIR = configData.submoduleDir;
+
 	Sys.println("Updating submodules...");
 	runGit("submodule", "update", "--init", "--recursive");
 	try {
@@ -63,7 +80,8 @@ function install() {
 }
 
 function getModulePath(name:String) {
-	return Path.join([SUBMODULE_DIR, name]);
+	configData = haxe.Json.parse(File.getContent(CONFIG_FILE));
+	return Path.join([configData.submoduleDir, name]);
 }
 
 function add(name:String, url:String) {
@@ -115,6 +133,7 @@ function help() {
 function parseArgs(args:Array<String>) {
 	switch args {
 		case ["init"]: init();
+		case ["init", folder]: init(folder);
 		//case ["delete"]: delete();
 		case ["install"]: install();
 		case ["add", name, url]: add(name, url);
