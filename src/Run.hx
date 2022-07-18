@@ -1,9 +1,8 @@
 import haxe.Exception;
-import sys.FileSystem;
 import haxe.io.Path;
-using StringTools;
+import sys.FileSystem;
 
-final SUBMODULE_DIR = "haxe_modules";
+using StringTools;
 
 macro function getVersion() {
 	final version:String = try {
@@ -31,21 +30,26 @@ final runGit = runCmd.bind("git");
 /** Runs a haxelib command. **/
 final runHaxelib = runCmd.bind("haxelib");
 
-function init() {
-	if (FileSystem.exists(SUBMODULE_DIR))
+function init(?folder) {
+	Config.initConfig(folder);
+
+	final submoduleDir = Config.getSubmoduleDir();
+
+	if (FileSystem.exists(submoduleDir))
 		throw new Exception("This folder already contains a submodule folder.");
-	FileSystem.createDirectory(SUBMODULE_DIR);
+	FileSystem.createDirectory(submoduleDir);
 	try {
 		runHaxelib("newrepo");
 	} catch (e) {
 		// already exists
 	}
-	Sys.println("Haxe module directory initialised");
+	Sys.println('Haxe module directory initialised at $submoduleDir');
 	Sys.println("Add `/.haxelib/` to .gitignore");
 }
 
 function delete() {
-	FileSystem.deleteDirectory(SUBMODULE_DIR);
+	FileSystem.deleteDirectory(Config.getSubmoduleDir());
+	Config.clearConfig();
 	//runHaxelib("deleterepo");
 }
 
@@ -56,14 +60,14 @@ function install() {
 		runHaxelib("newrepo");
 	} catch (e) {}
 
-	final projects = FileSystem.readDirectory(SUBMODULE_DIR);
+	final projects = FileSystem.readDirectory(Config.getSubmoduleDir());
 	for (name in projects) {
 		runHaxelib("dev", name, getModulePath(name));
 	}
 }
 
 function getModulePath(name:String) {
-	return Path.join([SUBMODULE_DIR, name]);
+	return Path.join([Config.getSubmoduleDir(), name]);
 }
 
 function add(name:String, url:String) {
@@ -106,7 +110,7 @@ function help() {
 		Sys.println('  $padded : $doc');
 	}
 
-	document("init", [], "Initialise scope");
+	document("init", ["[directory]"], "Initialise scope. Optionally specify a directory to use a non-default submodule directory.");
 	document("add", ["<name>", "<url>"], "Add submodule `name` from `url`");
 	document("install", [], "Install dependencies for existing project");
 	document("remove", ["<name>"], "Remove submodule `name` from project");
@@ -115,6 +119,7 @@ function help() {
 function parseArgs(args:Array<String>) {
 	switch args {
 		case ["init"]: init();
+		case ["init", folder]: init(folder);
 		//case ["delete"]: delete();
 		case ["install"]: install();
 		case ["add", name, url]: add(name, url);
