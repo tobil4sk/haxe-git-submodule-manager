@@ -47,7 +47,13 @@ To use this tool with a new/existing git project, run:
 haxelib run gsm init
 ```
 
-After this, the hidden `.haxelib` should be added to `.gitignore`.
+This creates and sets up a directory for submodules, which is `haxe_modules` by default. To specify a custom submodule directory, add the directory to the command:
+
+```bash
+haxelib run gsm init other-directory
+```
+
+After initialising, the hidden `.haxelib` folder must be added to `.gitignore`. Everything else should be checked into version control.
 
 Then, to add git dependencies as submodules, run:
 
